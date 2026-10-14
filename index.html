@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猜数字 · 一点好运</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 24px; background: #f2f5f0; color: #263b31; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    main { width: 100%; max-width: 440px; padding: 40px 32px; background: #fff; border: 1px solid #e2e9df; border-radius: 24px; box-shadow: 0 16px 60px #263b310c; }
+    .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; background: #edf4ea; color: #55734a; font-size: 12px; letter-spacing: 2px; }
+    h1 { margin: 22px 0 10px; font-size: 36px; letter-spacing: -1px; }
+    .intro { margin: 0 0 28px; color: #758077; font-size: 15px; line-height: 1.8; }
+    label { display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+    .row { display: flex; gap: 10px; }
+    input { min-width: 0; width: 100%; padding: 14px; border: 1px solid #dce4d8; border-radius: 12px; background: #fafcf9; color: #263b31; font: inherit; font-size: 18px; }
+    button { border: 0; border-radius: 12px; padding: 14px 20px; font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .submit { background: #355e43; color: white; }
+    .submit:hover { background: #284c35; }
+    :focus-visible { outline: 3px solid #99bb88; outline-offset: 3px; }
+    :disabled { opacity: .5; cursor: default; }
+    .message { display: flex; align-items: center; min-height: 76px; margin: 20px 0; padding: 16px; border-radius: 12px; background: #f3f6f0; font-size: 15px; line-height: 1.6; }
+    .message.win { background: #e5f3df; color: #355e43; }
+    footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #758077; font-size: 13px; }
+    .restart { padding: 8px 0; background: transparent; color: #355e43; font-size: 13px; }
+    @media (max-width: 400px) { main { padding: 30px 22px; } button { padding: 14px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="badge">一点好运 · 一点直觉</span>
+    <h1>猜数字</h1>
+    <p class="intro">我藏好了一个 <strong>1–100</strong> 之间的整数。<br>看看你能用几次找到它。</p>
+    <form id="form" novalidate>
+      <label for="guess">你的猜测</label>
+      <div class="row">
+        <input id="guess" type="number" min="1" max="100" step="1" inputmode="numeric" placeholder="输入 1–100" autocomplete="off" required autofocus>
+        <button id="submit" class="submit" type="submit">猜一下</button>
+      </div>
+    </form>
+    <p id="message" class="message" role="status" aria-live="polite">准备好了？试着猜第一个数字吧。</p>
+    <footer>
+      <span>已猜 <strong id="count">0</strong> 次</span>
+      <button id="restart" class="restart" type="button">重新开始 ↻</button>
+    </footer>
+  </main>
+  <script>
+    const form = document.getElementById('form');
+    const input = document.getElementById('guess');
+    const submit = document.getElementById('submit');
+    const message = document.getElementById('message');
+    const count = document.getElementById('count');
+    let target;
+    let attempts;
+    let finished;
+
+    function reset() {
+      target = Math.floor(Math.random() * 100) + 1;
+      attempts = 0;
+      finished = false;
+      count.textContent = '0';
+      input.value = '';
+      input.disabled = false;
+      submit.disabled = false;
+      message.classList.remove('win');
+      message.textContent = '准备好了？试着猜第一个数字吧。';
+      input.focus();
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (finished) return;
+      const guess = Number(input.value);
+      if (input.value.trim() === '' || !Number.isInteger(guess) || guess < 1 || guess > 100) {
+        message.textContent = '请输入 1–100 之间的整数，这次不计次数。';
+        input.focus();
+        return;
+      }
+      attempts += 1;
+      count.textContent = String(attempts);
+      if (guess === target) {
+        finished = true;
+        message.textContent = `猜中了！答案是 ${target}，你用了 ${attempts} 次。`;
+        message.classList.add('win');
+        input.disabled = true;
+        submit.disabled = true;
+        document.getElementById('restart').focus();
+      } else {
+        message.textContent = `${guess}，${guess > target ? '大了' : '小了'}！再试一次。`;
+        input.focus();
+        input.select();
+      }
+    });
+    document.getElementById('restart').addEventListener('click', reset);
+    reset();
+  </script>
+</body>
+</html>
