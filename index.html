@@ -21,6 +21,7 @@
     :disabled { opacity: .5; cursor: default; }
     .message { display: flex; align-items: center; min-height: 76px; margin: 20px 0; padding: 16px; border-radius: 12px; background: #f3f6f0; font-size: 15px; line-height: 1.6; }
     .message.win { background: #e5f3df; color: #355e43; }
+    .record { margin: -4px 0 20px; color: #758077; font-size: 13px; }
     footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #758077; font-size: 13px; }
     .restart { padding: 8px 0; background: transparent; color: #355e43; font-size: 13px; }
     @media (max-width: 400px) { main { padding: 30px 22px; } button { padding: 14px; } }
@@ -39,6 +40,7 @@
       </div>
     </form>
     <p id="message" class="message" role="status" aria-live="polite">准备好了？试着猜第一个数字吧。</p>
+    <p class="record">历史最佳：<strong id="best">暂无纪录</strong></p>
     <footer>
       <span>已猜 <strong id="count">0</strong> 次</span>
       <button id="restart" class="restart" type="button">重新开始 ↻</button>
@@ -50,6 +52,19 @@
     const submit = document.getElementById('submit');
     const message = document.getElementById('message');
     const count = document.getElementById('count');
+    const bestDisplay = document.getElementById('best');
+    const recordKey = 'guess-number-best';
+    let best = null;
+    try {
+      const saved = Number(localStorage.getItem(recordKey));
+      if (Number.isSafeInteger(saved) && saved > 0) best = saved;
+    } catch {
+      // 本地存储不可用时，仍可保留本次页面会话的纪录。
+    }
+    function showBest() {
+      bestDisplay.textContent = best === null ? '暂无纪录' : `${best} 次`;
+    }
+    showBest();
     let target;
     let attempts;
     let finished;
@@ -81,6 +96,16 @@
       if (guess === target) {
         finished = true;
         message.textContent = `猜中了！答案是 ${target}，你用了 ${attempts} 次。`;
+        if (best === null || attempts < best) {
+          best = attempts;
+          showBest();
+          message.textContent += ' 新纪录！';
+          try {
+            localStorage.setItem(recordKey, String(best));
+          } catch {
+            // 存储被禁用或已满时，不影响继续游戏。
+          }
+        }
         message.classList.add('win');
         input.disabled = true;
         submit.disabled = true;
