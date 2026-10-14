@@ -36,7 +36,7 @@
       <label for="guess">你的猜测</label>
       <div class="row">
         <input id="guess" type="number" min="1" max="100" step="1" inputmode="numeric" placeholder="输入 1–100" autocomplete="off" required autofocus>
-        <button id="submit" class="submit" type="submit">猜一下</button>
+        <button id="submit" class="submit" type="button">猜一下</button>
       </div>
     </form>
     <p id="message" class="message" role="status" aria-live="polite">准备好了？试着猜第一个数字吧。</p>
@@ -82,8 +82,7 @@
       input.focus();
     }
 
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
+    function makeGuess() {
       if (finished) return;
       const guess = Number(input.value);
       if (input.value.trim() === '' || !Number.isInteger(guess) || guess < 1 || guess > 100) {
@@ -115,6 +114,17 @@
         input.focus();
         input.select();
       }
+    }
+    submit.addEventListener('click', makeGuess);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        makeGuess();
+      }
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      makeGuess();
     });
     document.getElementById('restart').addEventListener('click', reset);
     reset();
